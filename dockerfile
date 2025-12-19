@@ -7,4 +7,4 @@ RUN bun install
 
 EXPOSE 3003
 
-CMD ["bun", "run", "index.ts"]
+CMD ["bun", "run", "src/index.ts"]
