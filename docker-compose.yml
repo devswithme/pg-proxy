@@ -1,0 +1,16 @@
+services:
+  hono-api:
+    build: .
+    container_name: hono-api
+    ports:
+      - "3003:3003"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - nginx
+
+networks:
+  nginx:
+    name: nginx
+    external: true
