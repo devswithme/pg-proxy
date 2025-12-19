@@ -1,10 +1,32 @@
-FROM oven/bun:latest
+# Build stage
+FROM oven/bun:1.2-debian AS build
 
 WORKDIR /app
+
+# Copy dependencies
+COPY bun.lock package.json ./
+
+# Build dependencies
+RUN bun install --frozen-lockfile --production --verbose
+
+# Copy source and compile
 COPY . .
 
-RUN bun install
+# RUN bun build
+RUN bun build --compile --minify --sourcemap ./src --outfile hono-docker-app
 
-EXPOSE 3003
+# Our application runner
+FROM gcr.io/distroless/base-debian12:nonroot AS runner
 
-CMD ["bun", "run", "src/index.ts"]
+ENV NODE_ENV=production
+
+ARG BUILD_APP_PORT=3003
+ENV APP_PORT=${BUILD_APP_PORT}
+EXPOSE ${APP_PORT}
+
+WORKDIR /app
+
+# Copy the compiled executable from the build stage
+COPY --from=build /app/hono-docker-app .
+
+ENTRYPOINT ["./hono-docker-app"]

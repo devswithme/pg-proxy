@@ -71,6 +71,6 @@ app.post("/webhook", webhookMiddleware(), async (c) => {
 });
 
 export default {
-  port: 3003,
+  port: process.env.PORT || 3003,
   fetch: app.fetch,
 };
