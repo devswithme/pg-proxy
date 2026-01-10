@@ -30,22 +30,8 @@ app.use(
 app.post("/invoice", async (c) => {
   const body = await c.req.json();
 
-  const { price, reference_id, hackathon_id, hackathon_title } = body;
-
   const data = await xendit.Invoice.createInvoice({
-    data: {
-      amount: price,
-      externalId: reference_id,
-      successRedirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/hackathon/${hackathon_id}`,
-      failureRedirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/hackathon/${hackathon_id}`,
-      items: [
-        {
-          name: hackathon_title,
-          price: price,
-          quantity: 1,
-        },
-      ],
-    },
+    data: body,
   });
 
   return c.json(data);
@@ -54,7 +40,15 @@ app.post("/invoice", async (c) => {
 app.post("/webhook", webhookMiddleware(), async (c) => {
   const body = await c.req.json();
 
-  const res = await fetch(process.env.CLIENT_WEBHOOK_URL!, {
+  let webhookUrl = null;
+
+  if (body.external_id.includes("hack")) {
+    webhookUrl = process.env.HACK_WEBHOOK_URL!;
+  } else if (body.external_id.includes("event")) {
+    webhookUrl = process.env.LENS_WEBHOOK_URL!;
+  }
+
+  const res = await fetch(webhookUrl!, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
