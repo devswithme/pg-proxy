@@ -12,7 +12,7 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: process.env.CORS_ORIGIN!,
+    origin: [process.env.HACK_WEBHOOK_URL!, process.env.LENS_WEBHOOK_URL!],
     allowMethods: ["GET", "POST"],
     allowHeaders: ["Content-Type", "Authorization", "x-api-key"],
   })
@@ -48,7 +48,7 @@ app.post("/webhook", webhookMiddleware(), async (c) => {
     webhookUrl = process.env.LENS_WEBHOOK_URL!;
   }
 
-  const res = await fetch(webhookUrl!, {
+  const res = await fetch(webhookUrl! + "/api/xendit", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
