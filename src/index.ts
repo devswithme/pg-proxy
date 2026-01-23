@@ -12,10 +12,10 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: [process.env.HACK_WEBHOOK_URL!, process.env.LENS_WEBHOOK_URL!],
+    origin: [process.env.APP_WEBHOOK_URL!],
     allowMethods: ["GET", "POST"],
     allowHeaders: ["Content-Type", "Authorization", "x-api-key"],
-  })
+  }),
 );
 
 app.use(
@@ -24,7 +24,7 @@ app.use(
   rateLimitMiddleware({
     windowMs: 30_000,
     max: 30,
-  })
+  }),
 );
 
 app.post("/invoice", async (c) => {
@@ -40,15 +40,7 @@ app.post("/invoice", async (c) => {
 app.post("/webhook", webhookMiddleware(), async (c) => {
   const body = await c.req.json();
 
-  let webhookUrl = null;
-
-  if (body.external_id.includes("hack")) {
-    webhookUrl = process.env.HACK_WEBHOOK_URL!;
-  } else if (body.external_id.includes("event")) {
-    webhookUrl = process.env.LENS_WEBHOOK_URL!;
-  }
-
-  const res = await fetch(webhookUrl! + "/api/xendit", {
+  const res = await fetch(process.env.APP_WEBHOOK_URL! + "/api/xendit", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
