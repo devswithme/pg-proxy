@@ -40,14 +40,20 @@ app.post("/invoice", async (c) => {
 app.post("/webhook", webhookMiddleware(), async (c) => {
   const body = await c.req.json();
 
-  const res = await fetch(process.env.APP_WEBHOOK_URL! + "/api/xendit", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Callback-Token": process.env.XENDIT_WEBHOOK_TOKEN!,
+  const res = await fetch(
+    body.external_id.includes("meetly")
+      ? process.env.APP1_WEBHOOK_URL!
+      : body.external_id.includes("hack") &&
+          process.env.APP_WEBHOOK_URL! + "/api/xendit",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Callback-Token": process.env.XENDIT_WEBHOOK_TOKEN!,
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-  });
+  );
 
   if (!res.ok) {
     return c.json({ error: "Failed to forward webhook to client" }, 502);
