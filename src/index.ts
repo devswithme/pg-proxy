@@ -42,7 +42,7 @@ app.post("/webhook", webhookMiddleware(), async (c) => {
 
   const res = await fetch(
     body.external_id.includes("meetly")
-      ? process.env.APP1_WEBHOOK_URL!
+      ? process.env.APP1_WEBHOOK_URL! + "/api/xendit"
       : body.external_id.includes("hack") &&
           process.env.APP_WEBHOOK_URL! + "/api/xendit",
     {
