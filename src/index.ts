@@ -38,13 +38,25 @@ app.post("/invoice", async (c) => {
 });
 
 app.post("/webhook", webhookMiddleware(), async (c) => {
-  const body = await c.req.json();
+  let body: { external_id: string };
+  try {
+    body = (await c.req.json()) as { external_id: string };
+  } catch (parseErr) {
+    const isJsonParseError =
+      parseErr instanceof SyntaxError ||
+      (parseErr instanceof Error &&
+        parseErr.message.includes("JSON Parse error"));
+    if (isJsonParseError) {
+      return c.json({ error: "Invalid or empty JSON body" }, 400);
+    }
+    throw parseErr;
+  }
 
   const res = await fetch(
-    body.external_id.includes("meetly")
+    (body.external_id.includes("meetly")
       ? process.env.APP1_WEBHOOK_URL! + "/api/xendit"
       : body.external_id.includes("hack") &&
-          process.env.APP_WEBHOOK_URL! + "/api/xendit",
+        process.env.APP_WEBHOOK_URL! + "/api/xendit") as string,
     {
       method: "POST",
       headers: {
@@ -56,6 +68,7 @@ app.post("/webhook", webhookMiddleware(), async (c) => {
   );
 
   if (!res.ok) {
+    console.log(await res.text());
     return c.json({ error: "Failed to forward webhook to client" }, 502);
   }
 

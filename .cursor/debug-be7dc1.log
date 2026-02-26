@@ -1,0 +1,2 @@
+{"sessionId":"be7dc1","location":"index.ts:webhook","message":"webhook handler entry","data":{"contentLength":"0","bodyLength":0,"bodyPreview":"[empty]"},"timestamp":1772064114145,"hypothesisId":"A,B,C,D,E"}
+{"sessionId":"be7dc1","location":"index.ts:webhook-parse","message":"c.req.json() threw","data":{"error":"JSON Parse error: Unexpected EOF","bodyLength":0},"timestamp":1772064114145,"hypothesisId":"A,B,C,E"}
