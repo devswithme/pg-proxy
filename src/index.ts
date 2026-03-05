@@ -52,20 +52,45 @@ app.post("/webhook", webhookMiddleware(), async (c) => {
     throw parseErr;
   }
 
-  const res = await fetch(
-    (body.external_id.includes("meetly")
-      ? process.env.APP1_WEBHOOK_URL! + "/api/xendit"
-      : body.external_id.includes("hack") &&
-        process.env.APP_WEBHOOK_URL! + "/api/xendit") as string,
+  const webhookRoutes: Array<{
+    id: string;
+    baseUrl: string | undefined;
+  }> = [
     {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Callback-Token": process.env.XENDIT_WEBHOOK_TOKEN!,
-      },
-      body: JSON.stringify(body),
+      id: "meetly",
+      baseUrl: "https://meetly.fydemy.com",
     },
-  );
+    {
+      id: "hack",
+      baseUrl: "https://hack.fydemy.com",
+    },
+    {
+      id: "lala",
+      baseUrl: "https://lala.fydemy.com",
+    },
+  ];
+
+  const route = webhookRoutes.find((r) => body.external_id.includes(r.id));
+  if (!route) {
+    return c.json({ error: "No matching webhook route for external_id" }, 400);
+  }
+  if (!route.baseUrl) {
+    return c.json(
+      { error: `Missing webhook base URL env for route: ${route.id}` },
+      500,
+    );
+  }
+
+  const targetUrl = new URL("/api/xendit", route.baseUrl).toString();
+
+  const res = await fetch(targetUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Callback-Token": process.env.XENDIT_WEBHOOK_TOKEN!,
+    },
+    body: JSON.stringify(body),
+  });
 
   if (!res.ok) {
     console.log(await res.text());
