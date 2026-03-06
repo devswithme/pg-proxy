@@ -66,7 +66,7 @@ app.post("/webhook", webhookMiddleware(), async (c) => {
     },
     {
       id: "lala",
-      baseUrl: "https://lala.fydemy.com",
+      baseUrl: "https://lala.fysite.id",
     },
   ];
 
